@@ -68,6 +68,7 @@ const VideoRecord = () => {
   const stopRecording = () => {
     setIsRecording(false)
     if (recorder) {
+      clearTimeout(timeoutId)
       recorder.stopRecording(() => {
         let blob = recorder.getBlob()
 
