@@ -78,10 +78,14 @@ const VideoRecord = () => {
         // Append the blob to the FormData instance
         formData.append("video", blob)
 
-        let label = window.prompt("Please enter a label for the video")
+        let label = window.prompt("Please enter a label for the subject")
+        let sequenceName = window.prompt("Please enter a name for the sequence")
 
         // Append the subjectId to the FormData instance
         formData.append("label", label)
+
+        // Append the sequence name to the FormData instance
+        formData.append("sequenceName", sequenceName)
 
         // Send the FormData instance to the server
         fetch(`${process.env.REACT_APP_API_HOSTNAME}/upload`, {
