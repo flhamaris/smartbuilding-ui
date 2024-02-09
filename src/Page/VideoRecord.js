@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import RecordRTC from "recordrtc"
+import { FaCircle, FaStop } from "react-icons/fa"
+import { ClipLoader } from "react-spinners"
 
 let timeoutId = null
 let recorder = null
@@ -21,8 +23,22 @@ const containerStyles = {
   alignItems: "center",
 }
 
+const backdropStyles = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+}
+
 const VideoRecord = () => {
   const [isRecording, setIsRecording] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -87,14 +103,25 @@ const VideoRecord = () => {
         // Append the sequence name to the FormData instance
         formData.append("sequenceName", sequenceName)
 
+        // Set isProcessing to true before starting the upload
+        setIsProcessing(true)
+
         // Send the FormData instance to the server
         fetch(`${process.env.REACT_APP_API_HOSTNAME}/upload`, {
           method: "POST",
           body: formData,
         })
           .then((response) => response.json())
-          .then((data) => console.log(data))
-          .catch((error) => console.error(error))
+          .then((data) => {
+            console.log(data)
+            // Set isProcessing back to false when the upload is done
+            setIsProcessing(false)
+          })
+          .catch((error) => {
+            console.error(error)
+            // Set isProcessing back to false if an error occurs
+            setIsProcessing(false)
+          })
       })
     }
   }
@@ -105,17 +132,34 @@ const VideoRecord = () => {
         <video ref={videoRef} autoPlay muted style={videoStyles} />
       </div>
       <div>
-        <button onClick={startRecording} style={buttonStyles}>
-          Start
+        <button
+          onClick={startRecording}
+          disabled={isRecording} // Disable the start button when recording
+          style={{
+            ...buttonStyles,
+            borderRadius: "50%", // Make the button circular
+            padding: "10px", // Add some padding
+          }}
+        >
+          <FaCircle /> {/* Add record icon */}
         </button>
         <button
           onClick={stopRecording}
           disabled={!isRecording}
-          style={buttonStyles}
+          style={{
+            ...buttonStyles,
+            borderRadius: "50%", // Make the button circular
+            padding: "10px", // Add some padding
+          }}
         >
-          Stop Recording
+          <FaStop /> {/* Add stop icon */}
         </button>
       </div>
+      {isProcessing && (
+        <div style={backdropStyles}>
+          <ClipLoader color="#ffffff" loading={isProcessing} size={150} />
+        </div>
+      )}
     </div>
   )
 }
